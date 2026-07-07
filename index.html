@@ -421,7 +421,7 @@
       position: absolute;
       left: 50%;
       bottom: 7vh;
-      transform: translateX(-50%);
+      transform: translateX(-50%) translateY(14px);
       width: 48em;
       max-width: 88vw;
       font-size: var(--fs);
@@ -430,6 +430,12 @@
       line-height: 1.32;
       text-align: center;
       color: var(--gray-dark);
+      opacity: 0;
+      transition: opacity 0.7s ease, transform 0.7s cubic-bezier(0.25, 1, 0.3, 1);
+    }
+    #takeaway.revealed {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
     }
     #takeaway a {
       color: #2563EB;
@@ -531,7 +537,7 @@
       .pillar { position: static; transform: none; width: 82vw; margin: 0 auto 1.2em; }
       .pillars { position: static; padding-top: 20vh; }
       #connector { display: none; }
-      #takeaway { position: static; transform: none; margin: 1.6em auto 0; }
+      #takeaway, #takeaway.revealed { position: static; transform: none; margin: 1.6em auto 0; }
     }
   </style>
 </head>
@@ -784,6 +790,57 @@
     })(t0);
   }
 
+  /* Same decrypt settle, but for markup-rich text (keeps <b>/<a> intact
+     by scrambling the text nodes in place, resolving left → right). */
+  function descrambleRich(el, dur = 950) {
+    if (el._running) return;
+    el._running = true;
+    const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
+    const nodes = [];
+    let total = 0, tn;
+    while ((tn = walker.nextNode())) {
+      nodes.push({ node: tn, orig: tn._orig || (tn._orig = tn.nodeValue), start: total });
+      total += tn.nodeValue.length;
+    }
+    const t0 = performance.now();
+    (function step(now) {
+      const p = clamp((now - t0) / dur, 0, 1);
+      const solved = Math.floor(p * total);
+      for (const { node, orig, start } of nodes) {
+        let s = '';
+        for (let i = 0; i < orig.length; i++) {
+          const ch = orig[i];
+          s += (start + i < solved || ch === ' ') ? ch
+             : GLYPHS[(Math.random() * GLYPHS.length) | 0];
+        }
+        node.nodeValue = s;
+      }
+      if (p < 1) requestAnimationFrame(step);
+      else {
+        for (const { node, orig } of nodes) node.nodeValue = orig;
+        el._running = false;
+      }
+    })(t0);
+  }
+
+  /* The takeaway reads last: it only decrypts once the three pillars
+     above it have settled. */
+  const takeaway = document.getElementById('takeaway');
+  let takeawayTimer = null;
+  function syncTakeaway(panelActive) {
+    const shown = takeaway.classList.contains('revealed');
+    if (panelActive && !shown && takeawayTimer === null) {
+      takeawayTimer = setTimeout(() => {
+        takeawayTimer = null;
+        takeaway.classList.add('revealed');
+        descrambleRich(takeaway);
+      }, 1050);
+    } else if (!panelActive) {
+      if (takeawayTimer !== null) { clearTimeout(takeawayTimer); takeawayTimer = null; }
+      takeaway.classList.remove('revealed');
+    }
+  }
+
   function panelFade(el, tIn, tOut) {
     // tIn: 0→1 fade in (rises 24px), tOut: 0→1 fade out (rises 24px)
     const o = tIn * (1 - tOut);
@@ -877,6 +934,7 @@
     panelFade(panels[5], in5, out5);
     panelFade(panels[6], in6, out6);
     panelFade(panels[7], in7, 0);
+    syncTakeaway(panels[7].classList.contains('active'));
 
     // Desktop 6 long copy scrolls up inside its panel
     const need = Math.max(0,
