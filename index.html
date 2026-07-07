@@ -12,6 +12,7 @@
       const t = localStorage.getItem('daedalus-theme');
       if (t === 'dark' || (!t && matchMedia('(prefers-color-scheme: dark)').matches)) {
         document.documentElement.classList.add('dark');
+        document.querySelector('meta[name="theme-color"]').content = '#000000';
       }
     } catch (e) {}
   </script>
@@ -793,9 +794,13 @@
     const sx  = lerp(1, kEnd, t23);
     const sy  = lerp(1, kEnd * FACE_SQUASH, t23);
 
-    // Light: black wordmark turns white over the gradient (Figma D1→D2).
+    // Light: black wordmark turns white over the gradient (Figma D1→D2),
+    // then tracks the brighter of "gradient still visible" and "landed on
+    // the logo face" during the morph, so it never sits white-on-white
+    // while the gradient fades out mid-flight.
     // Dark: the wordmark is white throughout (Figma 26:294 / 26:307).
-    const c = Math.round(lerp(isDark() ? 255 : 0, 255, t12));
+    const bright = isDark() ? 1 : Math.max(t12 * (1 - t23), t23);
+    const c = Math.round(255 * bright);
     title.style.color = `rgb(${c},${c},${c})`;
     title.style.transform =
       `translate(${hx.toFixed(2)}px, ${hy.toFixed(2)}px) ` +
