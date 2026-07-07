@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Daedalus</title>
-  <meta name="description" content="Building the brain of a factory">
+  <meta name="description" content="Building the brain for factories">
   <link rel="canonical" href="https://daedalusiq.com/">
 
   <!-- Social sharing — Desktop 4 view (logo + tagline). The light capture
@@ -12,16 +12,16 @@
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="Daedalus">
   <meta property="og:title" content="Daedalus">
-  <meta property="og:description" content="Building the brain of a factory">
+  <meta property="og:description" content="Building the brain for factories">
   <meta property="og:url" content="https://daedalusiq.com/">
   <meta property="og:image" content="https://daedalusiq.com/assets/og-image.png">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
-  <meta property="og:image:alt" content="Daedalus — an isometric labyrinth logo. Building the brain of a factory.">
+  <meta property="og:image:alt" content="Daedalus — an isometric labyrinth logo. Building the brain for factories.">
   <meta property="og:image" content="https://daedalusiq.com/assets/og-image-dark.png">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Daedalus">
-  <meta name="twitter:description" content="Building the brain of a factory">
+  <meta name="twitter:description" content="Building the brain for factories">
   <meta name="twitter:image" content="https://daedalusiq.com/assets/og-image.png">
 
   <meta name="theme-color" content="#ffffff">
@@ -142,6 +142,10 @@
       /* 100vh stage + 920vh of scroll choreography */
       height: 1020vh;
       position: relative;
+    }
+    /* small screens get extra runway: D7 pillars scroll internally */
+    @media (max-width: 900px) {
+      #track { height: 1200vh; }
     }
 
     #stage {
@@ -534,10 +538,39 @@
     /* ═══ SMALL SCREENS ════════════════════════════════════════ */
     @media (max-width: 900px) {
       :root { --fs: min(18px, 2.25vh); }
-      .pillar { position: static; transform: none; width: 82vw; margin: 0 auto 1.2em; }
-      .pillars { position: static; padding-top: 20vh; }
+      .pillar { position: static; transform: none; width: 82vw; margin: 0 auto 2.4em; }
+      .pillars { position: static; padding-top: 3vh; }
       #connector { display: none; }
-      #takeaway, #takeaway.revealed { position: static; transform: none; margin: 1.6em auto 0; }
+
+      /* vertical dotted connector (Figma mobile frame): a dashed drop
+         line ending in a node dot above each pillar */
+      .pillar::before {
+        content: '';
+        display: block;
+        width: 9px;
+        height: 6vh;
+        margin: 0 auto 14px;
+        background:
+          radial-gradient(circle 3.5px at 50% calc(100% - 3.5px), var(--ink) 98%, transparent),
+          repeating-linear-gradient(to bottom, var(--ink) 0 4px, transparent 4px 9px)
+            50% 0 / 1px calc(100% - 10px) no-repeat;
+      }
+      .pillar:first-child::before { height: 15vh; }
+
+      /* the takeaway gets its own screen at the end of the D7 scroll */
+      #panel-7 {
+        overflow: hidden;
+        -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 2vh, #000 100%);
+                mask-image: linear-gradient(to bottom, transparent 0, #000 2vh, #000 100%);
+      }
+      /* real flow content (counts in scrollHeight) so the takeaway
+         ends up vertically centered on its own final screen */
+      #panel-7 .panel-inner::after { content: ''; display: block; height: 27vh; }
+      #takeaway, #takeaway.revealed {
+        position: static;
+        transform: none;
+        margin: 60vh auto 0;
+      }
     }
   </style>
 </head>
@@ -582,7 +615,7 @@
     </div>
 
     <!-- Desktop 4 -->
-    <div id="tagline">Building the brain of a factory</div>
+    <div id="tagline">Building the brain for factories</div>
 
     <!-- Desktop 5 / 6 / 7 text content -->
     <div id="panels">
@@ -592,12 +625,12 @@
         <div class="panel-inner">
           <p class="panel-label">/ ˈdɛdələs / — daed · a · lus</p>
           <div class="panel-body-gray">
-            <p>Daedalus was the master craftsman of Greek mythology — the architect of the labyrinth, the builder of wings. Both things at once: the system that contains, and the intelligence that escapes it.</p>
+            <p>Daedalus was the master craftsman of Greek mythology, the architect of the labyrinth, the builder of wings. Both things at once: the system that contains, and the intelligence that escapes it.</p>
             <div class="blank-line"></div>
             <p>Our logo is a factory floor, viewed from above, drawn as a labyrinth.</p>
           </div>
           <p class="panel-body-italic" style="margin-top:24px;">
-            Machines on the factory floor don't talk to each other, and the data they produce never gets used. Daedalus reasons over what the whole system knows — and the worker, wearing wearables, is the cherry on top: capturing what no PLC sees and making it permanent.
+            Machines on the factory floor don't talk to each other, and the data they produce never gets used. Meanwhile one in four factory workers is near retirement, taking decades of tribal knowledge out the door. Daedalus reasons over what the whole system knows, and wearables are the cherry on top: capturing the know-how no PLC sees, and making it permanent.
           </p>
         </div>
       </div>
@@ -609,10 +642,10 @@
           <div class="panel-body-italic">
             <p>Legacy software wasn't made for the AI era: we fix that, or integrate seamlessly with the systems that act as truth sources. Yet nothing on the floor has solved the human layer.</p>
             <div class="blank-line"></div>
-            <p>The worker building the product — assembling the part, picking the component, running the procedure — generates data that no PLC can capture. Their hands are the most important sensor in the facility. Until now, that sensor had no interface.</p>
+            <p>The worker building the product generates data that no PLC can capture: assembling the part, picking the component, running the procedure. Their hands are the most important sensor in the facility. Until now, that sensor had no interface.</p>
             <div class="blank-line"></div>
-            <p>Tablets and phones extended the desktop paradigm to the floor; they never replaced it. Glasses are the first interface designed for the work itself — always-on, hands-free, spatially aware, worn during assembly rather than instead of it. <b>But we are not another glasses company.</b> We are a spatial intelligence company, and the wearable is the instrument.</p>
-            <p>The integrations it requires — MES, WMS, SCADA, procedures — become the platform.</p>
+            <p>Tablets and phones extended the desktop paradigm to the floor; they never replaced it. Glasses are the first interface designed for the work itself: always-on, hands-free, spatially aware, worn during assembly rather than instead of it. <b>But we are not another glasses company.</b> We are a spatial intelligence company, and the wearable is the instrument.</p>
+            <p>The integrations it requires (MES, WMS, SCADA, procedures) become the platform.</p>
             <div class="blank-line"></div>
             <p><b>The data it collects becomes the world model.</b></p>
           </div>
@@ -626,18 +659,18 @@
           <div class="pillars">
             <div class="pillar">
               <h3>AI Vision Modules</h3>
-              <p>Smart glasses at the station — component recognition, error detection, and procedure guidance as the work happens. Collecting the egocentric data no PLC has ever seen.</p>
+              <p>Vision that runs on any device, from glasses to fixed cameras: component recognition, error detection, and procedure guidance as the work happens. Collecting the data no PLC has ever seen.</p>
             </div>
             <div class="pillar">
               <h3>Digital Twin</h3>
-              <p>Your factory floor — modeled, simulated, and continuously improved. Fed by a synthetic data pipeline that combines your plant in 3D with input data no one else captures.</p>
+              <p>Your factory floor, modeled, simulated, and continuously improved. Our synthetic data pipeline trains AI agents roughly 10x faster, turning months of data collection into days.</p>
             </div>
             <div class="pillar">
               <h3>MCP Intelligent layer</h3>
-              <p>MES, WMS, SCADA, ERP — all connected through a single AI bridge. One natural-language query — any system, any answer. The brain that reasons over the whole floor.</p>
+              <p>MES, WMS, SCADA, ERP: all connected through a single AI bridge. One natural-language query, any system, any answer. The brain that reasons over the whole floor.</p>
             </div>
           </div>
-          <p id="takeaway"><b>Three products, one architecture.</b> We control the inputs that feed the model and the surfaces that deliver it — any hardware, not just glasses. Factory intelligence must be industry-specific, spatially and contextually aware: <b>super-specialized world models</b>, not generic LLMs — and not specialized models built on one. <a href="mailto:aaron@daedalusiq.com,aldo@daedalusiq.com?subject=Why%20not%20LLM-based%3F">Ask us why</a></p>
+          <p id="takeaway"><b>Three products, one architecture.</b> We control the inputs that feed the model and the surfaces that deliver it: any hardware, not just glasses. Factory intelligence must be industry-specific, spatially and contextually aware. <b>Super-specialized world models</b>, not generic LLMs, and not specialized models built on one. <a href="mailto:aaron@daedalusiq.com,aldo@daedalusiq.com?subject=Why%20not%20LLM-based%3F">Ask us why</a></p>
         </div>
       </div>
 
@@ -685,6 +718,7 @@
     7: document.getElementById('panel-7'),
   };
   const inner6   = panels[6].querySelector('.panel-inner');
+  const inner7   = panels[7].querySelector('.panel-inner');
   const panelsBox = document.getElementById('panels');
   const deco     = document.getElementById('deco');
   const dotCv    = document.getElementById('dot-canvas');
@@ -739,6 +773,8 @@
     x56:      [6.4, 7.0],   // D5 → D6 cross-fade
     p6Scroll: [7.0, 8.0],   // D6 long text scrolls internally
     x67:      [8.0, 8.6],   // D6 → D7 cross-fade
+    p7Scroll: [8.75, 9.05], // small screens: stacked pillars scroll up,
+                            // giving the takeaway its own final screen
     d7Hold:   [8.6, 9.2],
   };
 
@@ -934,7 +970,6 @@
     panelFade(panels[5], in5, out5);
     panelFade(panels[6], in6, out6);
     panelFade(panels[7], in7, 0);
-    syncTakeaway(panels[7].classList.contains('active'));
 
     // Desktop 6 long copy scrolls up inside its panel
     const need = Math.max(0,
@@ -942,6 +977,14 @@
     const t6s = seg(u, ...PH.p6Scroll);
     inner6.style.transform =
       `translateX(-50%) translateY(${(-need * t6s).toFixed(1)}px)`;
+
+    // Desktop 7: stacked pillars overflow on small screens, so they scroll
+    // up inside the panel and the takeaway lands on its own final screen
+    const need7 = Math.max(0, inner7.scrollHeight - panelsBox.offsetHeight);
+    const t7s = seg(u, ...PH.p7Scroll);
+    inner7.style.transform = `translateY(${(-need7 * t7s).toFixed(1)}px)`;
+    syncTakeaway(panels[7].classList.contains('active') &&
+                 (need7 === 0 || t7s > 0.55));
 
     /* ── scroll hint: gone once the reading panels arrive ───── */
     hint.style.opacity = (1 - seg(u, ...PH.p5In)).toFixed(4);
