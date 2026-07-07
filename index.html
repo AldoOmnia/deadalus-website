@@ -86,6 +86,18 @@
       transition: border-color 0.3s ease, background-color 0.45s ease;
     }
     #theme-toggle:hover { border-color: color-mix(in srgb, #EC4899 65%, transparent); }
+    #theme-toggle svg {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 12px;
+      height: 12px;
+      color: var(--ink);
+      opacity: 0.55;
+      transition: color 0.45s ease;
+    }
+    #theme-toggle .sun  { left: 6.5px; }
+    #theme-toggle .moon { right: 6.5px; }
     #theme-toggle .knob {
       position: absolute;
       top: 2.5px;
@@ -476,6 +488,13 @@
 <body>
 
 <button id="theme-toggle" aria-label="Toggle dark mode" title="Toggle dark mode">
+  <svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+    <circle cx="12" cy="12" r="4.6"/>
+    <path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M19.1 4.9L17 7M7 17l-2.1 2.1"/>
+  </svg>
+  <svg class="moon" viewBox="0 0 24 24" fill="currentColor">
+    <path d="M20.5 14.6A8.6 8.6 0 0 1 9.4 3.5a8.6 8.6 0 1 0 11.1 11.1Z"/>
+  </svg>
   <span class="knob"></span>
 </button>
 
