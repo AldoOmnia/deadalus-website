@@ -231,7 +231,7 @@
       will-change: opacity;
     }
 
-    /* Scroll hint */
+    /* Scroll hint — tapping it jumps to the product architecture (D7) */
     #scroll-hint {
       position: absolute;
       bottom: 2.6vh;
@@ -242,6 +242,12 @@
       font-weight: 500;
       color: var(--gray);
       will-change: opacity;
+      padding: 10px 18px;          /* comfortable tap target */
+      cursor: url('assets/cursor-32.png') 1 1, pointer;
+    }
+    @media (max-width: 900px) {
+      /* keep it clear of mobile browser toolbars */
+      #scroll-hint { bottom: 6vh; }
     }
 
     /* ═══ DECOR — sunset frame + interactive dot background ════
@@ -676,7 +682,7 @@
 
     </div><!-- #panels -->
 
-    <div id="scroll-hint">scroll down</div>
+    <div id="scroll-hint" role="button" tabindex="0" aria-label="Scroll to the product architecture">scroll down</div>
 
   </div><!-- #stage -->
 </div><!-- #track -->
@@ -987,7 +993,9 @@
                  (need7 === 0 || t7s > 0.55));
 
     /* ── scroll hint: gone once the reading panels arrive ───── */
-    hint.style.opacity = (1 - seg(u, ...PH.p5In)).toFixed(4);
+    const hintOp = 1 - seg(u, ...PH.p5In);
+    hint.style.opacity = hintOp.toFixed(4);
+    hint.style.pointerEvents = hintOp > 0.1 ? 'auto' : 'none';
 
     /* ── sunset frame + dots: only on the white pages D5–D7 ─── */
     const decoOp = seg(u, 4.5, PH.p5In[1]);
@@ -1145,6 +1153,16 @@
     my = e.clientY - rect.top;
     if (dotsActive) wakeDots();
   }, { passive: true });
+
+  /* "scroll down" jumps straight to the product architecture (Desktop 7) */
+  function goToD7() {
+    const target = (track.offsetHeight - window.innerHeight) * (8.72 / U);
+    window.scrollTo({ top: target, behavior: 'smooth' });
+  }
+  hint.addEventListener('click', goToD7);
+  hint.addEventListener('keydown', e => {
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); goToD7(); }
+  });
 
   window.addEventListener('scroll', onScroll, { passive: true });
   window.addEventListener('resize', () => { buildDots(); onScroll(); });
