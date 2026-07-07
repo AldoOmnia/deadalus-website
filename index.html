@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Daedalus</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,500;0,700;1,500;1,700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      /* Exact gradient from the Figma logo / Desktop-2 background */
+      --grad: linear-gradient(90deg, #FB923C 1.43%, #EC4899 48.54%, #7C3AED 101.31%);
+      --gray: #a5a5a5;
+      --gray-dark: #7b7b7b;
+      --font: 'EB Garamond', Georgia, serif;
+      /* 1 design px (1440-wide frame) = 0.06944vw */
+      --title-size: 27.584vw;      /* 397.2px @1440 */
+      --title-lh: 1.304;           /* 518/397.2 */
+      /* Body type: 25px cap, scales with viewport height so even the
+         longest section fits below the docked logo in one view */
+      --fs: min(25px, 2.25vh);
+    }
+
+    html { scroll-behavior: auto; }
+
+    body {
+      font-family: var(--font);
+      background: #fff;
+      color: #000;
+      overflow-x: hidden;
+    }
+
+    img { display: block; }
+
+    /* ═══ SCROLL TRACK + STICKY STAGE ══════════════════════════ */
+    #track {
+      /* 100vh stage + 920vh of scroll choreography */
+      height: 1020vh;
+      position: relative;
+    }
+
+    #stage {
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      width: 100%;
+      overflow: hidden;
+    }
+
+    /* Backgrounds */
+    #bg-gradient {
+      position: absolute; inset: 0;
+      background: var(--grad);
+      opacity: 0;
+      will-change: opacity;
+    }
+
+    /* Giant wordmark — Desktop 1 & 2, morphs into the logo face text */
+    #hero-title {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: max-content;
+      font-size: var(--title-size);
+      font-weight: 500;
+      line-height: var(--title-lh);
+      white-space: nowrap;
+      color: #000;
+      transform: translateY(60.35vh);
+      transform-origin: 0 0;
+      z-index: 3;
+      pointer-events: none;
+      user-select: none;
+      will-change: transform, color;
+    }
+
+    /* Isometric labyrinth logo — Desktop 3 → 7 (width set from JS,
+       sized from viewport height to keep Figma's vertical ratios) */
+    #logo {
+      position: absolute;
+      left: 50%;
+      top: 0;
+      transform-origin: top center;
+      opacity: 0;
+      z-index: 2;
+      will-change: transform, opacity;
+    }
+    #logo img { width: 100%; height: auto; }
+
+    /* "Daedalus" on the front-right face of the box. Position and
+       transform reproduce the Figma text node exactly: the block's
+       untransformed top-left sits at 50.09% / 75.34% of the drawn
+       logo, then rotate(-30) skewX(-30) scaleY(.866) lifts it onto
+       the isometric face. */
+    #face-text {
+      position: absolute;
+      left: 50.09%;
+      top: 75.34%;
+      transform-origin: 0 0;
+      transform: rotate(-30deg) skewX(-30deg) scaleY(0.866);
+      color: #fff;
+      font-weight: 500;
+      line-height: var(--title-lh);
+      white-space: nowrap;
+      opacity: 0;
+      pointer-events: none;
+      user-select: none;
+    }
+
+    /* Tagline — Desktop 4 (671/1024 = right below the logo) */
+    #tagline {
+      position: absolute;
+      top: 66vh;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: var(--fs);
+      font-style: italic;
+      font-weight: 500;
+      color: #000;
+      opacity: 0;
+      white-space: nowrap;
+      will-change: opacity;
+    }
+
+    /* Scroll hint */
+    #scroll-hint {
+      position: absolute;
+      bottom: 2.6vh;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: var(--fs);
+      font-style: italic;
+      font-weight: 500;
+      color: var(--gray);
+      will-change: opacity;
+    }
+
+    /* ═══ PANELS (Desktop 5 / 6 / 7 content) ═══════════════════ */
+    #panels {
+      position: absolute;
+      left: 0;
+      top: 29vh;
+      width: 100%;
+      height: 71vh;
+    }
+
+    .panel {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      will-change: opacity, transform;
+      pointer-events: none;
+    }
+    .panel.active { pointer-events: auto; }
+
+    /* Desktop 6 copy is the longest: keep a soft top mask so it never
+       touches the logo (it slides internally only if it overflows) */
+    #panel-6 {
+      overflow: hidden;
+      -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 2vh, #000 100%);
+              mask-image: linear-gradient(to bottom, transparent 0, #000 2vh, #000 100%);
+    }
+
+    .panel-inner {
+      position: absolute;
+      top: 2vh;                  /* label ~3.2vh below the logo bottom */
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: var(--fs);
+      width: 20.32em;            /* 508px / 25px — tracks the type size */
+      max-width: 88vw;
+      will-change: transform;
+    }
+
+    .panel-label {
+      font-size: 1em;
+      font-style: italic;
+      font-weight: 500;
+      color: var(--gray);
+      text-align: center;
+      margin-bottom: 0.84em;     /* 21px / 25px */
+    }
+
+    .panel-body-gray {
+      font-size: 1em;
+      font-weight: 500;
+      color: var(--gray);
+      line-height: 1.32;
+    }
+
+    .panel-body-italic {
+      font-size: 1em;
+      font-weight: 500;
+      font-style: italic;
+      color: var(--gray-dark);
+      line-height: 1.32;
+      text-align: justify;
+    }
+
+    .panel-body-italic b { font-weight: 700; }
+
+    .blank-line { height: 1.32em; }
+
+    /* Desktop 7 — connector + three pillars */
+    #panel-7 .panel-inner { width: 100%; max-width: none; transform: none; left: 0; top: 0; }
+
+    #connector {
+      position: absolute;
+      top: -2.3vh;               /* ~11px above the logo bottom, as in Figma */
+      left: 21.94vw;             /* 316px @1440 */
+      width: 54.99vw;            /* 791.9px @1440, height follows = 13.19vw */
+    }
+
+    /* Pillars hang from the connector dots, so they follow it on any aspect ratio */
+    .pillars {
+      position: absolute;
+      top: calc(13.19vw - 0.1vh); /* connector top + connector height + 20px gap */
+      left: 0;
+      width: 100%;
+    }
+
+    .pillar {
+      position: absolute;
+      transform: translateX(-50%);
+      width: 11.28em;            /* 282px / 25px — tracks the type size */
+      font-size: var(--fs);
+      font-weight: 500;
+      font-style: italic;
+      line-height: 1.32;
+      text-align: justify;
+    }
+    .pillar h3 {
+      font-size: 1em;
+      font-weight: 500;
+      font-style: italic;
+      color: var(--gray-dark);
+    }
+    .pillar p { color: var(--gray); }
+    .pillar:nth-child(1) { left: 22.64vw; }   /* centered on 326px @1440 */
+    .pillar:nth-child(2) { left: 50.35vw; }   /* centered on 725px @1440 */
+    .pillar:nth-child(3) { left: 78.06vw; }   /* centered on 1124px @1440 */
+
+    /* ═══ FOOTER (bottom of Desktop 7) ═════════════════════════ */
+    #footer { background: #fff; }
+
+    #footer-hint {
+      text-align: center;
+      font-size: var(--fs);
+      font-style: italic;
+      font-weight: 500;
+      color: var(--gray);
+      padding-top: 7.29vw;               /* 105px @1440 below the fold */
+    }
+
+    #footer-contacts {
+      width: fit-content;
+      margin: 6.25vw auto 3.68vw;    /* 90px / 53px @1440 */
+    }
+    #footer-contacts a {
+      display: block;
+      font-size: var(--fs);
+      font-style: italic;
+      font-weight: 500;
+      color: var(--gray);
+      text-decoration: none;
+    }
+    #footer-contacts a:hover { color: #000; }
+
+    #factory-wrap {
+      position: relative;
+    }
+
+    #factory {
+      width: 100vw;
+      height: auto;
+    }
+
+    /* © line sits on the black lower edge of the factory image (Figma: 25:282) */
+    #copyright {
+      position: absolute;
+      left: 50%;
+      bottom: 1.39vw;                /* 20px @1440 above the bar */
+      transform: translateX(-50%);
+      font-size: var(--fs);
+      font-style: italic;
+      font-weight: 500;
+      color: var(--gray);
+      white-space: nowrap;
+    }
+
+    #footer-bar {
+      position: relative;
+      background: #000;
+      height: 18.75vw;               /* 270px @1440 */
+      overflow: hidden;
+    }
+    #footer-wordmark {
+      position: absolute;
+      left: 0;
+      top: -7.29vw;                  /* text box starts 105px above the bar */
+      width: 100%;
+      font-size: var(--title-size);
+      font-weight: 500;
+      line-height: var(--title-lh);
+      white-space: nowrap;
+      color: #fff;
+    }
+
+    /* ═══ SMALL SCREENS ════════════════════════════════════════ */
+    @media (max-width: 900px) {
+      :root { --fs: min(18px, 2.25vh); }
+      .pillar { position: static; transform: none; width: 82vw; margin: 0 auto 1.2em; }
+      .pillars { position: static; padding-top: 20vh; }
+      #connector { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ═══ STICKY SCROLL EXPERIENCE — Desktop 1 → 7 ═══════════════ -->
+<div id="track">
+  <div id="stage">
+
+    <div id="bg-gradient"></div>
+
+    <!-- Desktop 1 / 2 -->
+    <div id="hero-title">Daedalus</div>
+
+    <!-- Desktop 3 → 7 : isometric labyrinth logo -->
+    <div id="logo">
+      <img src="assets/logo.svg" alt="Daedalus logo — a factory floor depicted as an isometric labyrinth">
+      <div id="face-text">Daedalus</div>
+    </div>
+
+    <!-- Desktop 4 -->
+    <div id="tagline">Building the brain of a factory</div>
+
+    <!-- Desktop 5 / 6 / 7 text content -->
+    <div id="panels">
+
+      <!-- Desktop 5 — etymology -->
+      <div class="panel" id="panel-5">
+        <div class="panel-inner">
+          <p class="panel-label">/ ˈdɛdələs / — daed · a · lus</p>
+          <div class="panel-body-gray">
+            <p>Daedalus was the master craftsman of Greek mythology — the architect of the labyrinth, the builder of wings. Both things at once: the system that contains, and the intelligence that escapes it.</p>
+            <div class="blank-line"></div>
+            <p>Our logo is a factory floor, viewed from above, depicted as a labyrinth.</p>
+          </div>
+          <p class="panel-body-italic" style="margin-top:24px;">
+            Today every intelligent layer built for the factory floor talks to machines. Daedalus talks to the worker wearing wearables: capturing what PLCs cannot see, reasoning over what the whole system knows, and building the world model that makes it permanent.
+          </p>
+        </div>
+      </div>
+
+      <!-- Desktop 6 — the human layer -->
+      <div class="panel" id="panel-6">
+        <div class="panel-inner">
+          <p class="panel-label">Every factory AI play missed the same thing</p>
+          <div class="panel-body-italic">
+            <p>The machine-side is covered. PLCs are connected. Sensors stream data. AI agents run on the edge and predict failures, configure equipment, optimize throughput. None of it has solved the human layer.</p>
+            <div class="blank-line"></div>
+            <p>The worker building the product — assembling the part, picking the component, running the procedure — generates data that no PLC can capture. Their hands are the most important sensor in the facility. Until now, that sensor had no interface.</p>
+            <div class="blank-line"></div>
+            <p>Tablets and phones extended the desktop paradigm to the floor. They did not replace it. Glasses are the first interface designed for the work itself — always-on, hands-free, spatially aware, worn during assembly, not instead of it. <b>But we are not another glasses company.</b> We are a spatial intelligence company. The wearable is the instrument.</p>
+            <p>The integrations it requires — MES, WMS, SCADA, procedures — become the platform.</p>
+            <div class="blank-line"></div>
+            <p><b>The data it collects becomes the world model.</b></p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Desktop 7 — three pillars -->
+      <div class="panel" id="panel-7">
+        <div class="panel-inner">
+          <img id="connector" src="assets/connector.svg" alt="">
+          <div class="pillars">
+            <div class="pillar">
+              <h3>AI Vision Modules</h3>
+              <p>Deploy smart glasses with component recognition, error detection, and procedure guidance at the station. Collect the egocentric data that no PLC has ever seen.</p>
+            </div>
+            <div class="pillar">
+              <h3>Digital Twin</h3>
+              <p>Your factory floor, modeled, simulated, and continuously improved. With a custom synthetic data pipeline that combines your factory in 3D with unique input data.</p>
+            </div>
+            <div class="pillar">
+              <h3>MCP Intelligent layer</h3>
+              <p>MES, WMS, SCADA, ERP — all connected through a single AI bridge. One natural-language query, any system, any answer. The brain that reasons over the whole floor.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- #panels -->
+
+    <div id="scroll-hint">scroll down</div>
+
+  </div><!-- #stage -->
+</div><!-- #track -->
+
+
+<!-- ═══ FOOTER — bottom of Desktop 7 ═══════════════════════════ -->
+<footer id="footer">
+  <p id="footer-hint">scroll down</p>
+
+  <div id="footer-contacts">
+    <a href="mailto:aaron@deadalusiq.com">aaron@deadalusiq.com</a>
+    <a href="mailto:aldo@deadalusiq.com">aldo@deadalusiq.com</a>
+  </div>
+
+  <div id="factory-wrap">
+    <img id="factory" src="assets/factory-brand.png" alt="Factory rendered in the Daedalus gradient, dissolving into the page">
+    <p id="copyright">© 2026 DeadalusIQ, Inc.</p>
+  </div>
+
+  <div id="footer-bar">
+    <div id="footer-wordmark">Daedalus</div>
+  </div>
+</footer>
+
+
+<!-- ═══ SCROLL CHOREOGRAPHY ════════════════════════════════════ -->
+<script>
+(() => {
+  const track    = document.getElementById('track');
+  const bgGrad   = document.getElementById('bg-gradient');
+  const title    = document.getElementById('hero-title');
+  const logo     = document.getElementById('logo');
+  const faceText = document.getElementById('face-text');
+  const tagline  = document.getElementById('tagline');
+  const hint     = document.getElementById('scroll-hint');
+  const panels   = {
+    5: document.getElementById('panel-5'),
+    6: document.getElementById('panel-6'),
+    7: document.getElementById('panel-7'),
+  };
+  const inner6   = panels[6].querySelector('.panel-inner');
+  const panelsBox = document.getElementById('panels');
+
+  const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
+  const lerp  = (a, b, t) => a + (b - a) * t;
+  const easeIO = t => t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+  const easeO  = t => 1 - Math.pow(1 - t, 3);
+
+  // progress of u inside [a, b], eased
+  const seg = (u, a, b, ez = easeIO) => ez(clamp((u - a) / (b - a), 0, 1));
+
+  // Total choreography length in "viewport units" (track = 100vh + U*100vh)
+  const U = 9.2;
+
+  // Phase boundaries (in viewport units of scroll)
+  const PH = {
+    d1Hold:   [0.0, 0.4],
+    toD2:     [0.4, 1.4],   // gradient in, title rises & turns white
+    d2Hold:   [1.4, 1.8],
+    toD3:     [1.8, 2.8],   // wordmark morphs into the logo face text
+    d3Hold:   [2.8, 3.1],
+    toD4:     [3.1, 3.6],   // tagline fades in
+    d4Hold:   [3.6, 4.0],
+    toD5:     [4.0, 5.0],   // logo shrinks to top, tagline out
+    p5In:     [5.0, 5.6],
+    p5Hold:   [5.6, 6.4],
+    x56:      [6.4, 7.0],   // D5 → D6 cross-fade
+    p6Scroll: [7.0, 8.0],   // D6 long text scrolls internally
+    x67:      [8.0, 8.6],   // D6 → D7 cross-fade
+    d7Hold:   [8.6, 9.2],
+  };
+
+  /* ── Figma ratios (1440 × 1024 frames) ─────────────────────
+     Big logo  (D3/D4): drawn part 376.5 × 316.3 → 30.89% of height
+     Small logo (D5-7): drawn part 216.6 × 181.9, top at 238px
+     Face text: 59.83px on a 376.5px-wide logo → 15.89% of width  */
+  const LOGO_ASPECT = 1224 / 1457;          // svg h/w
+  const BIG_H_FRAC  = 316.3 / 1024;
+  const SMALL_SCALE = 181.86 / 316.3;
+  const SMALL_TOP   = 0.10;                 // docked higher than Figma's 238/1024
+                                            // so the copy below fits in one view
+  const FACE_FONT   = 59.83 / 376.55;       // fraction of logo width
+  const FACE_ROT    = -30;                  // deg — Figma iso face transform
+  const FACE_SQUASH = 0.866;                // scaleY on the iso face
+
+  function layout() {
+    // Logo sized from viewport height (Figma vertical ratio), capped on
+    // narrow screens so it never overflows horizontally.
+    const bigW = Math.min(
+      BIG_H_FRAC * window.innerHeight / LOGO_ASPECT,
+      0.72 * window.innerWidth
+    );
+    logo.style.width = bigW + 'px';
+    faceText.style.fontSize = (FACE_FONT * bigW) + 'px';
+    return bigW;
+  }
+
+  function panelFade(el, tIn, tOut) {
+    // tIn: 0→1 fade in (rises 24px), tOut: 0→1 fade out (rises 24px)
+    const o = tIn * (1 - tOut);
+    const y = lerp(24, 0, tIn) + lerp(0, -24, tOut);
+    el.style.opacity = o.toFixed(4);
+    el.style.transform = `translateY(${y.toFixed(2)}px)`;
+    el.classList.toggle('active', o > 0.5);
+  }
+
+  let ticking = false;
+
+  function render() {
+    ticking = false;
+    const logoW = layout();
+    const logoH = logoW * LOGO_ASPECT;
+    const iw = window.innerWidth;
+    const ih = window.innerHeight;
+    const trackScroll = track.offsetHeight - ih;
+    const u = clamp(-track.getBoundingClientRect().top / trackScroll, 0, 1) * U;
+
+    /* ── Desktop 1 → 2 : gradient + title rise ─────────────── */
+    const t12 = seg(u, ...PH.toD2);
+    const t23 = seg(u, ...PH.toD3);
+
+    bgGrad.style.opacity = (t12 * (1 - t23)).toFixed(4);
+
+    /* ── Desktop 3 : logo appears, wordmark morphs onto it ─── */
+    const t45 = seg(u, ...PH.toD5);
+
+    const logoScaleIn = lerp(0.82, 1, easeO(t23));     // slight growth on entry
+    const logoScale   = logoScaleIn * lerp(1, SMALL_SCALE, t45);
+    // keep the logo optically centered while big, then dock it at the top
+    const yCentered   = 0.5 * ih - (logoH * logoScale) / 2;
+    const logoY       = lerp(yCentered, SMALL_TOP * ih, t45);
+    logo.style.opacity = t23.toFixed(4);
+    logo.style.transform =
+      `translate(-50%, ${logoY.toFixed(2)}px) scale(${logoScale.toFixed(4)})`;
+
+    /* Wordmark: rises through D2, then shrinks + tilts into the
+       isometric "Daedalus" on the front face of the box. */
+    const heroFont = 0.27584 * iw;                    // --title-size in px
+    const Ws = logoW * logoScale;                     // on-screen logo width
+    const Hs = logoH * logoScale;
+    // face-text origin in screen coords (matches #face-text CSS: 50.09% / 75.34%)
+    const faceX = (iw / 2 - Ws / 2) + 0.5009 * Ws;
+    const faceY = logoY + 0.7534 * Hs;
+    const kEnd  = (FACE_FONT * logoW * logoScale) / heroFont;
+
+    const hx  = lerp(0, faceX, t23);
+    const hy  = lerp(lerp(0.6035, 0.3086, t12) * ih, faceY, t23);
+    const rot = lerp(0, FACE_ROT, t23);
+    const skw = lerp(0, FACE_ROT, t23);
+    const sx  = lerp(1, kEnd, t23);
+    const sy  = lerp(1, kEnd * FACE_SQUASH, t23);
+
+    const c = Math.round(lerp(0, 255, t12));
+    title.style.color = `rgb(${c},${c},${c})`;
+    title.style.transform =
+      `translate(${hx.toFixed(2)}px, ${hy.toFixed(2)}px) ` +
+      `rotate(${rot.toFixed(3)}deg) skewX(${skw.toFixed(3)}deg) ` +
+      `scale(${sx.toFixed(5)}, ${sy.toFixed(5)})`;
+
+    // Hand off: the hero wordmark becomes the logo's face text
+    const morphDone = t23 >= 1;
+    title.style.visibility = morphDone ? 'hidden' : 'visible';
+    faceText.style.opacity = morphDone ? '1' : '0';
+
+    /* ── Desktop 4 : tagline ───────────────────────────────── */
+    const tagIn  = seg(u, ...PH.toD4);
+    const tagOut = seg(u, PH.toD5[0], PH.toD5[0] + (PH.toD5[1] - PH.toD5[0]) * 0.45);
+    tagline.style.opacity = (tagIn * (1 - tagOut)).toFixed(4);
+
+    /* ── Desktop 5 / 6 / 7 : text panels ───────────────────── */
+    const in5  = seg(u, ...PH.p5In);
+    const out5 = seg(u, PH.x56[0], (PH.x56[0] + PH.x56[1]) / 2);
+    const in6  = seg(u, (PH.x56[0] + PH.x56[1]) / 2, PH.x56[1]);
+    const out6 = seg(u, PH.x67[0], (PH.x67[0] + PH.x67[1]) / 2);
+    const in7  = seg(u, (PH.x67[0] + PH.x67[1]) / 2, PH.x67[1]);
+
+    panelFade(panels[5], in5, out5);
+    panelFade(panels[6], in6, out6);
+    panelFade(panels[7], in7, 0);
+
+    // Desktop 6 long copy scrolls up inside its panel
+    const need = Math.max(0,
+      inner6.offsetTop + inner6.offsetHeight - (panelsBox.offsetHeight - 20));
+    const t6s = seg(u, ...PH.p6Scroll);
+    inner6.style.transform =
+      `translateX(-50%) translateY(${(-need * t6s).toFixed(1)}px)`;
+
+    /* ── scroll hint: gone once the reading panels arrive ───── */
+    hint.style.opacity = (1 - seg(u, ...PH.p5In)).toFixed(4);
+  }
+
+  function onScroll() {
+    if (!ticking) {
+      ticking = true;
+      requestAnimationFrame(render);
+    }
+  }
+
+  window.addEventListener('scroll', onScroll, { passive: true });
+  window.addEventListener('resize', onScroll);
+  render();
+})();
+</script>
+
+</body>
+</html>
