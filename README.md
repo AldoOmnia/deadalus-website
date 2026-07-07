@@ -32,5 +32,5 @@ python3 -m http.server 8741
 
 ## Contact
 
-- aaron@deadalusiq.com
-- aldo@deadalusiq.com
+- aaron@daedalusiq.com
+- aldo@daedalusiq.com
