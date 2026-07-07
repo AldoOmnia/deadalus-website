@@ -370,7 +370,7 @@
     .blank-line { height: 1.32em; }
 
     /* Desktop 7 — connector + three pillars */
-    #panel-7 .panel-inner { width: 100%; max-width: none; transform: none; left: 0; top: 0; }
+    #panel-7 .panel-inner { width: 100%; max-width: none; transform: none; left: 0; top: 0; height: 100%; }
 
     #connector {
       position: absolute;
@@ -415,6 +415,31 @@
     .pillar:nth-child(1) { left: 22.64vw; }   /* centered on 326px @1440 */
     .pillar:nth-child(2) { left: 50.35vw; }   /* centered on 725px @1440 */
     .pillar:nth-child(3) { left: 78.06vw; }   /* centered on 1124px @1440 */
+
+    /* The main takeaway — closes Desktop 7 under the three pillars */
+    #takeaway {
+      position: absolute;
+      left: 50%;
+      bottom: 7vh;
+      transform: translateX(-50%);
+      width: 48em;
+      max-width: 88vw;
+      font-size: var(--fs);
+      font-style: italic;
+      font-weight: 500;
+      line-height: 1.32;
+      text-align: center;
+      color: var(--gray-dark);
+    }
+    #takeaway a {
+      color: #2563EB;
+      text-decoration: none;
+      border-bottom: 1px solid currentColor;
+      transition: color 0.25s ease;
+    }
+    #takeaway a:hover { color: #7C3AED; }
+    html.dark #takeaway a { color: #60A5FA; }
+    html.dark #takeaway a:hover { color: #EC4899; }
 
     /* ═══ FOOTER (bottom of Desktop 7) ═════════════════════════ */
     #footer { background: var(--bg); transition: background-color 0.45s ease; }
@@ -506,6 +531,7 @@
       .pillar { position: static; transform: none; width: 82vw; margin: 0 auto 1.2em; }
       .pillars { position: static; padding-top: 20vh; }
       #connector { display: none; }
+      #takeaway { position: static; transform: none; margin: 1.6em auto 0; }
     }
   </style>
 </head>
@@ -562,10 +588,10 @@
           <div class="panel-body-gray">
             <p>Daedalus was the master craftsman of Greek mythology — the architect of the labyrinth, the builder of wings. Both things at once: the system that contains, and the intelligence that escapes it.</p>
             <div class="blank-line"></div>
-            <p>Our logo is a factory floor, viewed from above, depicted as a labyrinth.</p>
+            <p>Our logo is a factory floor, viewed from above, drawn as a labyrinth.</p>
           </div>
           <p class="panel-body-italic" style="margin-top:24px;">
-            Machines on the factory floor don't talk to each other — the data they produce never gets used. Daedalus reasons over what the whole system knows, and the worker wearing wearables is the cherry on top: capturing what no PLC sees, making it permanent.
+            Machines on the factory floor don't talk to each other, and the data they produce never gets used. Daedalus reasons over what the whole system knows — and the worker, wearing wearables, is the cherry on top: capturing what no PLC sees and making it permanent.
           </p>
         </div>
       </div>
@@ -575,11 +601,11 @@
         <div class="panel-inner">
           <p class="panel-label">Every factory AI play missed the same thing</p>
           <div class="panel-body-italic">
-            <p>The machine-side only looks covered. Legacy software wasn't made for the AI era: we fix that, or integrate seamlessly with the systems acting as truth sources. None of it has solved the human layer.</p>
+            <p>Legacy software wasn't made for the AI era: we fix that, or integrate seamlessly with the systems that act as truth sources. Yet nothing on the floor has solved the human layer.</p>
             <div class="blank-line"></div>
             <p>The worker building the product — assembling the part, picking the component, running the procedure — generates data that no PLC can capture. Their hands are the most important sensor in the facility. Until now, that sensor had no interface.</p>
             <div class="blank-line"></div>
-            <p>Tablets and phones extended the desktop paradigm to the floor. They did not replace it. Glasses are the first interface designed for the work itself — always-on, hands-free, spatially aware, worn during assembly, not instead of it. <b>But we are not another glasses company.</b> We are a spatial intelligence company. The wearable is the instrument.</p>
+            <p>Tablets and phones extended the desktop paradigm to the floor; they never replaced it. Glasses are the first interface designed for the work itself — always-on, hands-free, spatially aware, worn during assembly rather than instead of it. <b>But we are not another glasses company.</b> We are a spatial intelligence company, and the wearable is the instrument.</p>
             <p>The integrations it requires — MES, WMS, SCADA, procedures — become the platform.</p>
             <div class="blank-line"></div>
             <p><b>The data it collects becomes the world model.</b></p>
@@ -594,17 +620,18 @@
           <div class="pillars">
             <div class="pillar">
               <h3>AI Vision Modules</h3>
-              <p>Deploy smart glasses with component recognition, error detection, and procedure guidance at the station. Collect the egocentric data that no PLC has ever seen.</p>
+              <p>Smart glasses at the station — component recognition, error detection, and procedure guidance as the work happens. Collecting the egocentric data no PLC has ever seen.</p>
             </div>
             <div class="pillar">
               <h3>Digital Twin</h3>
-              <p>Your factory floor, modeled, simulated, and continuously improved. With a custom synthetic data pipeline that combines your factory in 3D with unique input data.</p>
+              <p>Your factory floor — modeled, simulated, and continuously improved. Fed by a synthetic data pipeline that combines your plant in 3D with input data no one else captures.</p>
             </div>
             <div class="pillar">
               <h3>MCP Intelligent layer</h3>
-              <p>MES, WMS, SCADA, ERP — all connected through a single AI bridge. One natural-language query, any system, any answer. The brain that reasons over the whole floor.</p>
+              <p>MES, WMS, SCADA, ERP — all connected through a single AI bridge. One natural-language query — any system, any answer. The brain that reasons over the whole floor.</p>
             </div>
           </div>
+          <p id="takeaway"><b>Three products, one architecture.</b> We control the inputs that feed the model and the surfaces that deliver it — any hardware, not just glasses. Factory intelligence must be industry-specific, spatially and contextually aware: <b>super-specialized world models</b>, not generic LLMs — and not specialized models built on one. <a href="mailto:aaron@daedalusiq.com,aldo@daedalusiq.com?subject=Why%20not%20LLM-based%3F">Ask us why</a></p>
         </div>
       </div>
 
