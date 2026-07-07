@@ -137,6 +137,17 @@
 
     ::selection { background: #EC4899; color: #fff; }
 
+    /* Custom scrollbar in the brand palette */
+    html { scrollbar-width: thin; scrollbar-color: #EC4899 transparent; }
+    ::-webkit-scrollbar { width: 11px; height: 11px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb {
+      background: linear-gradient(180deg, #FB923C, #EC4899, #7C3AED);
+      border-radius: 8px;
+      border: 3px solid var(--bg);
+    }
+    ::-webkit-scrollbar-thumb:hover { border-width: 2px; }
+
     /* ═══ SCROLL TRACK + STICKY STAGE ══════════════════════════ */
     #track {
       /* 100vh stage + 920vh of scroll choreography */
@@ -162,6 +173,24 @@
       background: var(--grad);
       opacity: 0;
       will-change: opacity;
+    }
+
+    /* Desktop 2 — a worker with wearables and a humanoid, drawn as
+       dot-matrix figures in the sunset palette, walk along the wordmark's
+       baseline (inside the line of text) and meet in the middle. */
+    #hero-figures {
+      position: absolute;
+      inset: 0;
+      z-index: 2;                /* behind the wordmark: they walk inside it */
+      opacity: 0;
+      pointer-events: none;
+      will-change: opacity;
+    }
+    #hero-figures img {
+      position: absolute;
+      left: 0;
+      top: 0;
+      will-change: transform;
     }
 
     /* Giant wordmark — Desktop 1 & 2, morphs into the logo face text */
@@ -614,6 +643,12 @@
     <!-- Desktop 1 / 2 -->
     <div id="hero-title">Daedalus</div>
 
+    <!-- Desktop 2: worker + humanoid walking inside the wordmark line -->
+    <div id="hero-figures" aria-hidden="true">
+      <img id="fig-worker" src="assets/fig-worker-a.png" alt="">
+      <img id="fig-humanoid" src="assets/fig-humanoid-a.png" alt="">
+    </div>
+
     <!-- Desktop 3 → 7 : isometric labyrinth logo -->
     <div id="logo">
       <img src="assets/logo.svg" alt="Daedalus logo — a factory floor depicted as an isometric labyrinth">
@@ -717,6 +752,15 @@
   const logo     = document.getElementById('logo');
   const faceText = document.getElementById('face-text');
   const tagline  = document.getElementById('tagline');
+  const figsEl      = document.getElementById('hero-figures');
+  const figWorker   = document.getElementById('fig-worker');
+  const figHumanoid = document.getElementById('fig-humanoid');
+  /* Dot-matrix walk-cycle frames (a/b) for the D2 figures */
+  const FIGS = {
+    worker:   ['assets/fig-worker-a.png',   'assets/fig-worker-b.png'],
+    humanoid: ['assets/fig-humanoid-a.png', 'assets/fig-humanoid-b.png'],
+  };
+  Object.values(FIGS).flat().forEach(s => { const i = new Image(); i.src = s; });
   const hint     = document.getElementById('scroll-hint');
   const panels   = {
     5: document.getElementById('panel-5'),
@@ -960,6 +1004,40 @@
     const morphDone = t23 >= 1;
     title.style.visibility = morphDone ? 'hidden' : 'visible';
     faceText.style.opacity = morphDone ? '1' : '0';
+
+    /* ── Desktop 2 : worker + humanoid walk inside the wordmark ─
+       Two dot-matrix figures (sunset palette) walk along the wordmark's
+       baseline, tucked behind the white letters so they move through the
+       text. A two-frame walk cycle + heel-strike bob makes them walk,
+       not slide. They meet in the middle and dissolve away. */
+    const walk  = seg(u, 0.55, 1.60, t => t);        // linear: even steps
+    const meet  = seg(u, 1.44, 1.74);                // dissolve at the meeting
+    const figIn = seg(u, 0.55, 0.75);                // quick fade-in on entry
+    const figOp = figIn * (1 - meet);
+    figsEl.style.opacity = figOp.toFixed(4);
+    if (figOp > 0.002) {
+      const W  = title.offsetWidth;                  // wordmark box (scale = 1 here)
+      const H  = title.offsetHeight;
+      const fH = 0.58 * H;                           // figure ~ letter height
+      const fW = fH * 0.59;
+      const step  = walk * 12;                       // step cadence over the walk
+      const frame = Math.floor(step) % 2;
+      const bob   = 0.006 * H * Math.abs(Math.sin(step * Math.PI));
+      if (figsEl._frame !== frame) {
+        figsEl._frame = frame;
+        figWorker.src   = FIGS.worker[frame];
+        figHumanoid.src = FIGS.humanoid[(frame + 1) % 2];
+      }
+      const baseY = hy + 0.815 * H;                  // wordmark baseline
+      const wX = hx + lerp(-fW, 0.42 * W - fW, walk); // worker: in from the left
+      const hX = hx + lerp(W,   0.47 * W,      walk); // humanoid: from the right
+      figWorker.style.height   = fH.toFixed(1) + 'px';
+      figHumanoid.style.height = fH.toFixed(1) + 'px';
+      figWorker.style.transform =
+        `translate(${wX.toFixed(1)}px, ${(baseY - fH - bob).toFixed(1)}px)`;
+      figHumanoid.style.transform =
+        `translate(${hX.toFixed(1)}px, ${(baseY - fH - bob * 0.5).toFixed(1)}px)`;
+    }
 
     /* ── Desktop 4 : tagline ───────────────────────────────── */
     const tagIn  = seg(u, ...PH.toD4);
